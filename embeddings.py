@@ -36,3 +36,7 @@ def plot_vectors(model, tokenizer, indices=[0, 1, 2, 3, 4]):
 df = pd.read_csv("spam.csv", encoding="latin-1")
 train_texts = df.v2.tolist()
 train_labels = np.array(to_number(df.v1))
+tokenizer = Tokenizer()
+tokenizer.fit_on_texts(train_texts)
+vocab_size = len(tokenizer.word_index) + 1
+tokenized_texts = tokenizer.texts_to_sequences(train_texts)
