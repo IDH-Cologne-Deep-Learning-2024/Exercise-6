@@ -36,3 +36,32 @@ def plot_vectors(model, tokenizer, indices=[0, 1, 2, 3, 4]):
 df = pd.read_csv("spam.csv", encoding="latin-1")
 train_texts = df.v2.tolist()
 train_labels = np.array(to_number(df.v1))
+
+tokenizer = Tokenizer()
+tokenizer.fit_on_texts(train_texts)
+vocab_size = len(tokenizer.word_index) + 1
+tokenized_texts = tokenizer.texts_to_sequences(train_texts)
+
+MAX_LENGTH = max(len(tokenized_text) for tokenized_text in tokenized_texts)
+tokenized_texts = pad_sequences(tokenized_texts , maxlen=MAX_LENGTH , padding="post")
+
+model = Sequential()
+
+model.add(Input(shape=(MAX_LENGTH ,)))
+model.add(Embedding(vocab_size, 2, input_length=MAX_LENGTH))
+model.add(Flatten())
+model.add(Dense(100, activation="sigmoid"))
+model.add(Dense(100, activation="sigmoid"))
+model.add(Dense(100, activation="sigmoid"))
+model.add(Dense(100, activation="sigmoid"))
+model.add(Dense(1, activation="sigmoid"))
+
+model.compile(loss="binary_crossentropy", optimizer="sgd")
+model.fit(tokenized_texts, np.arange(len(train_texts)), epochs=10, verbose=1)
+
+# print(tokenizer.word_index)
+
+# "xxx" "sex" "gay" "digital" "black" "high" "lady" "porn" "erotic","ramen","chick","boobs","revealing","bitching"])
+words = [380, 890, 1297, 1305, 1306, 1378, 1570, 2296, 8743, 8790, 8817, 8818, 8819, 8849, 8920]
+
+plot_vectors(model=model, tokenizer=tokenizer,indices=words)
