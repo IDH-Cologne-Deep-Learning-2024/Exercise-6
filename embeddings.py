@@ -36,3 +36,29 @@ def plot_vectors(model, tokenizer, indices=[0, 1, 2, 3, 4]):
 df = pd.read_csv("spam.csv", encoding="latin-1")
 train_texts = df.v2.tolist()
 train_labels = np.array(to_number(df.v1))
+
+max_vocab_size = 1000 
+max_sequence_length = 20 
+tokenizer = Tokenizer(num_words=max_vocab_size)
+tokenizer.fit_on_texts(train_texts)
+
+sequences = tokenizer.texts_to_sequences(train_texts)
+padded_sequences = pad_sequences(sequences, maxlen=max_sequence_length, padding='post')
+
+embedding_dim = 2
+model = Sequential([
+    Embedding(input_dim=max_vocab_size, output_dim=embedding_dim, input_length=max_sequence_length),
+    Flatten(),
+    Dense(10, activation='relu'),
+    Dense(1, activation='sigmoid')
+])
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+epochs = 10
+model.fit(padded_sequences, train_labels, epochs=epochs, batch_size=32, validation_split=0.2)
+
+selected_words = ['free', 'win', 'money', 'call', 'ham']
+indices = [tokenizer.word_index[word] for word in selected_words if word in tokenizer.word_index]
+
+plot_vectors(model, tokenizer, indices=indices)
